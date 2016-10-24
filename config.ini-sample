@@ -1,0 +1,65 @@
+[paths]
+tmp=/tmp
+archive=/media/photos/raws
+outdir=/media/photos/to_check
+source=/mnt/camera
+
+db=/media/photos/camerasync.sqlite
+
+
+pfstools_bindir=/usr/bin
+imagick_bindir=/usr/bin
+hugin_bindir=/usr/bin
+ufraw_bindir=/usr/bin
+exiftool_bindir=/usr/bin
+
+[filetypes]
+raw=arw
+img=jpg tiff png tif
+
+
+[output]
+format=jpg
+; This is args to 'convert' when creating the output file(s)
+;args=-quality 95
+
+hdr_suffix=hdr
+; if temporary .tiff and .hdr files in tmp directory should be removed
+save_tmp_files=yes
+; if this is false, only the first file in a bracket sequence is saved
+save_all_brackets=no
+; save all tonemapped images, not just the merged hdr image
+save_tonemaps=yes
+
+
+[ufraw-batch]
+args=--out-type=tif --out-depth=16 --overwrite
+
+; TMO programs from pfstools.
+;args - can be set to send specific arguments to the tonemapping tool, see each tool for valid arguments
+;gamma - if set the pfsgamma tool will be added to the pfstool pipeline, doing gamma adjustment according to the set value (-g to pfsgamma)
+;opacity - % opacity for this image in the final HDR image.
+;
+[pfstmo_drago03]
+;args=-b 1
+;gamma=0.67
+opacity=30
+
+[pfstmo_fattal02]
+opacity=30
+
+;[pfstmo_durand02]
+
+;[pfstmo_ferradans11]
+
+;[pfstmo_mai11]
+
+;[pfstmo_mantiuk06]
+
+;[pfstmo_mantiuk08]
+
+;[pfstmo_pattanaik00]
+
+;[pfstmo_reinhard02]
+
+;[pfstmo_reinhard05]
