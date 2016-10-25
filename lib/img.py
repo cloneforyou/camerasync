@@ -170,6 +170,40 @@ def copy_exif_data(sources, target):
     out, err = proc.communicate()
     shutil.copystat(source, target)
 
+def copy_images(files, outdir):
+    if not os.path.isdir(outdir):
+        os.makedirs(outdir)
+    for f in files:
+        shutil.copyfile(f['path'], os.path.join(outdir, f['name']))
+        shutil.copystat(f['path'], os.path.join(outdir, f['name']))
+
+def process_raws(files, tmp_dir):
+    num_files = len(files)
+    tiffs = []
+    orig_saved = False
+    save_all_raws = config.get_output_options().getboolean('save_all_brackets')
+    if not files:
+        return
+
+    for f in sorted(files, key=lambda x: x['name']):
+        if num_files < 2 and f['processed']:
+            return
+        f['short_name'] = f['name'].rsplit(".", 1)[0]
+        if f['seq'] and f['seq'] < 2:
+            img_name = f['short_name']
+        tiff = os.path.join(tmp_dir, "{}.tiff".format(f['short_name']))
+        create_tiff(f['path'], tiff)
+        shutil.copystat(f['path'], tiff)
+        if save_all_raws or not orig_saved:
+            save_tiff(tiff, f['short_name'])
+            orig_saved = True
+        tiffs.append(tiff)
+    if num_files > 1:
+        create_hdr(tiffs, img_name)
+    if not config.get_output_options().getboolean('save_tmp_files'):
+        remove_files(tiffs)
+
+
 class ImageProcessor(multiprocessing.Process):
 
     def __init__(self, images):
@@ -182,38 +216,11 @@ class ImageProcessor(multiprocessing.Process):
         self.tmp_dir = config.get_path('tmp')
 
     def copy_images(self, files):
-        if not os.path.isdir(self.outdir):
-            os.makedirs(self.outdir)
+        copy_images(files, self.outdir)
 
-        for f in files:
-            shutil.copyfile(f['path'], os.path.join(self.outdir, f['name']))
-            shutil.copystat(f['path'], os.path.join(self.outdir, f['name']))
 
     def process_raws(self, files):
-        num_files = len(files)
-        tiffs = []
-        orig_saved = False
-        save_all_raws = config.get_output_options().getboolean('save_all_brackets')
-        if not files:
-            return
-
-        for f in sorted(files, key=lambda x: x['name']):
-            if num_files < 2 and f['processed']:
-                return
-            f['short_name'] = f['name'].rsplit(".", 1)[0]
-            if f['seq'] and f['seq'] < 2:
-                img_name = f['short_name']
-            tiff = os.path.join(self.tmp_dir, "{}.tiff".format(f['short_name']))
-            create_tiff(f['path'], tiff)
-            shutil.copystat(f['path'], tiff)
-            if save_all_raws or not orig_saved:
-                save_tiff(tiff, f['short_name'])
-                orig_saved = True
-            tiffs.append(tiff)
-        if num_files > 1:
-            create_hdr(tiffs, img_name)
-        if not config.get_output_options().getboolean('save_tmp_files'):
-            remove_files(tiffs)
+        process_raws(files, self.tmp_dir)
 
 
     def run(self):
