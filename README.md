@@ -27,6 +27,10 @@ See the config.ini-sample file. Rename it to config.ini and place in the working
 Create the configuration file and then run:
 
     python3 camera.py
+    
+You can also manually handle files by providing them as arguments. This is useful to reprocess some files or to test new settings.
+
+    python3 camera.py <path to file1> ... <path to fileN>
 
 ## Questions?
 This is a tool I created to solve a specific problem for me. If you have any questions about it, or would find it useful if it just had this one small feature, please let me know :)
