@@ -186,7 +186,7 @@ def process_raws(files, tmp_dir):
         return
 
     for f in sorted(files, key=lambda x: x['name']):
-        if num_files < 2 and f['processed']:
+        if num_files < 2 and 'processed' in f and f['processed']:
             return
         f['short_name'] = f['name'].rsplit(".", 1)[0]
         if f['seq'] and f['seq'] < 2:

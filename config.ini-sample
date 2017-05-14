@@ -17,6 +17,9 @@ exiftool_bindir=/usr/bin
 raw=arw
 img=jpg tiff png tif
 
+[processing]
+; Default is nr of cpu cores divided by 2. Override auto-detect here. 
+;concurrency=2
 
 [output]
 format=jpg

@@ -55,7 +55,7 @@ def process_images(db_url, archive_dir, tmp_dir, outdir):
     conn.commit()
     conn.close()
     processes = []
-    cpus = multiprocessing.cpu_count()
+    cpus = config.get_concurrency()
     if len(images) < cpus:
         proc = img.ImageProcessor(images)
         proc.start()

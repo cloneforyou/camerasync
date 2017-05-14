@@ -1,4 +1,5 @@
 import configparser
+import multiprocessing
 import os
 
 config = configparser.ConfigParser()
@@ -41,3 +42,9 @@ def get_exe_args(exe):
 
 def get_output_options():
     return config['output']
+
+def get_concurrency():
+    ret = max([int(multiprocessing.cpu_count()/2), 1])
+    if 'concurrency' in config['processing']:
+        ret = int(config['processing']['concurrency'])
+    return ret
