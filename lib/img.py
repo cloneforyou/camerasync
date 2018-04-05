@@ -6,6 +6,7 @@ import logging
 
 import lib.db as db
 import lib.config as config
+from lib.exceptions import UnableToAlignException
 
 def create_tiff(raw_path, tmp_path):
     exe = os.path.join(config.get_path('ufraw_bindir'), 'ufraw-batch')
@@ -45,6 +46,8 @@ def align_tiffs(tiffs, img_name):
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE)
     out, err = p_out.communicate()
+    if not os.path.exists(path):
+        raise UnableToAlignException("Tried: '{} -i -o {} {}'".format(exe, path, ''.join(tiffs)))
     return path
 
 def tonemap(hdr, tmo, img_name):
@@ -52,7 +55,7 @@ def tonemap(hdr, tmo, img_name):
     outdir = config.get_path('tmp')
     pfstools_path = config.get_path('pfstools_bindir')
     tmo_name = tmo.rsplit('_', 1)[1]
-    outfile=os.path.join(outdir, "{}.{}.tiff".format(img_name, tmo_name))
+    outfile=os.path.join(outdir, "{}.{}.ppm".format(img_name, tmo_name))
     
     log.info("Tonemapping {} with algorithm {}".format(img_name, tmo_name))
 
@@ -178,6 +181,7 @@ def copy_images(files, outdir):
         shutil.copystat(f['path'], os.path.join(outdir, f['name']))
 
 def process_raws(files, tmp_dir):
+    log = logging.getLogger()
     num_files = len(files)
     tiffs = []
     orig_saved = False
@@ -199,7 +203,10 @@ def process_raws(files, tmp_dir):
             orig_saved = True
         tiffs.append(tiff)
     if num_files > 1:
-        create_hdr(tiffs, img_name)
+        try:
+            create_hdr(tiffs, img_name)
+        except UnableToAlignException:
+            log.warning("Could not align parts for {}, unable to create HDR".format(img_name))
     if not config.get_output_options().getboolean('save_tmp_files'):
         remove_files(tiffs)
 

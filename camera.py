@@ -21,7 +21,10 @@ def archive_files(db_conn, source, target):
     for root, dirs, files in os.walk(source):
         for f in files:
             f_info = f.rsplit('.', 1)
-            f_type = f_info[1].lower()
+            try:
+                f_type = f_info[1].lower()
+            except IndexError:
+                continue
             target_dir = os.path.join(target, f_type)
             target_file = os.path.join(target_dir, f)
 

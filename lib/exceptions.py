@@ -1,0 +1,2 @@
+class UnableToAlignException(Exception):
+    pass
